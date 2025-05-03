@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>KoaLin</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="main.ico" type="image/x-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <style>
+    /* Reset cơ bản */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Thiết lập nền sao lấp lánh */
+    body {
+      background: #000 url('https://www.transparenttextures.com/patterns/stardust.png') repeat;
+      font-family: 'Quicksand', sans-serif;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+    }
+
+    /* Hiệu ứng các ngôi sao chuyển động */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: 
+        radial-gradient(2px 2px at 20px 30px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 160px 120px, #fff, rgba(0,0,0,0));
+      background-size: 200px 200px;
+      animation: stars 40s linear infinite;
+    }
+
+    @keyframes stars {
+      from { background-position: 0 0; }
+      to { background-position: -200px 200px; }
+    }
+
+    /* Màn hình chào đón */
+    .welcome-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      background-color: rgba(0, 0, 0, 0.7);
+      transition: all 1s ease;
+    }
+
+    .welcome-title {
+      font-family: 'Great Vibes', cursive;
+      font-size: 5em;
+      text-align: center;
+      text-shadow: 0 0 20px #fff;
+      transition: all 1s ease;
+    }
+
+    /* Nội dung chính ban đầu bị ẩn */
+    .main-content {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      text-align: center;
+      padding: 20px 0;
+      font-size: 2.5em;
+      font-family: 'Great Vibes', cursive;
+      background-color: rgba(0, 0, 0, 0.4);
+      border-bottom: 1px solid #fff2;
+      text-shadow: 0 0 15px #fff;
+      transform: translateY(-100px);
+      opacity: 0;
+      transition: all 1s ease;
+    }
+
+    /* Container chứa ảnh và khung truyện */
+    .container {
+      display: flex;
+      flex: 1;
+      box-shadow: 0 0 20px #ffffff22;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: all 1s ease;
+      width: 100%;
+      padding-left: 34px;
+    }
+
+    /* Danh sách ảnh */
+    .image-list {
+      padding: 20px;
+      width: 100%;
+      padding-top: 120px;
+      background-color: rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      overflow-y: scroll;
+      scrollbar-width: none;
+      transition: all 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    .image-list::-webkit-scrollbar {
+      display: none;
+    }
+
+    .image-list.narrow {
+      width: 50%;
+    }
+
+    /* Từng ảnh */
+    .image-item {
+      text-align: center;
+      width: 100%;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 20px;
+      margin-left: 23px;
+    }
+
+    .date-label {
+      font-size: 1.5em;
+      font-weight: bold;
+      font-family: 'Great Vibes', cursive;
+      text-shadow: 0 0 8px #fff;
+      margin-bottom: 15px;
+      width: 100%;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+    }
+
+    .image-item img {
+      width: 80%;
+      max-width: 600px;
+      border-radius: 10px;
+      box-shadow: 0 0 12px #ffffff55;
+      cursor: pointer;
+      transition: all 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+      display: block;
+      margin: 0 auto;
+    }
+
+    .image-item img:hover {
+      box-shadow: 0 0 20px #ffffff88;
+      transform: scale(1.02);
+    }
+
+    .image-item img.active {
+      transform: translateX(20px) scale(1.1);
+      box-shadow: 0 0 25px #ffffffaa;
+    }
+
+    /* Khung hiện truyện */
+    .story-box {
+      width: 0;
+      opacity: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: all 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+      background-color: rgba(17, 17, 17, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+      margin: auto 20px auto 0;
+      height: 80%;
+      overflow: hidden;
+    }
+
+    .story-box.active {
+      width: 40%;
+      opacity: 1;
+      display: flex;
+    }
+
+    /* Khung truyện */
+    textarea {
+      width: 100%;
+      height: 100%;
+      background-color: rgba(34, 34, 34, 0.9);
+      color: white;
+      border: none;
+      resize: none;
+      font-size: 1.1em;
+      padding: 15px;
+      font-family: 'Quicksand', sans-serif;
+      line-height: 1.6;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+
+    textarea:focus {
+      outline: none;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Nút điều khiển nhạc */
+    .music-control {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 100;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.5s ease 0.5s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 44px;
+      height: 44px;
+    }
+
+    body {
+      overflow-x: hidden;
+    }
+
+    .music-control.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .music-control:hover {
+      transform: scale(1.1) !important;
+      background: rgba(0,0,0,0.9);
+    }
+
+    .music-control i {
+      font-size: 24px;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Màn hình chào -->
+  <div class="welcome-screen" id="welcomeScreen">
+    <div class="welcome-title" id="welcomeTitle">Khoa & Linh</div>
+  </div>
+
+  <!-- Nội dung chính -->
+  <div class="main-content" id="mainContent">
+    <header id="mainHeader">Khoa & Linh</header>
+
+    <div class="container" id="mainContainer">
+      <div class="image-list" id="imageList">
+        <!-- Ảnh và câu chuyện sẽ được thêm tự động bằng JavaScript -->
+      </div>
+
+      <div class="story-box" id="storyBox">
+        <textarea id="storyText" readonly></textarea>
+      </div>
+    </div>
+
+    <!-- Nút nhạc -->
+    <div class="music-control" id="musicControl">
+      <i class="fas fa-pause"></i>
+    </div>
+  </div>
+
+  <!-- Nhạc nền -->
+  <audio id="bgMusic" loop>
+    <source src="music.mp3" type="audio/mpeg">
+    Trình duyệt của bạn không hỗ trợ audio.
+  </audio>
+
+  <script>
+
+
+
+    // Dữ liệu ảnh và câu chuyện
+    const memories = [
+      {
+        date: "01/05/2025",
+        image: "1.png",
+        story: "Ngày đầu tiên chúng ta gặp nhau...\n\nÁnh mắt em lấp lánh như những vì sao trên bầu trời đêm ấy. Tôi biết mình đã tìm thấy điều gì đó thật đặc biệt từ cái nhìn đầu tiên."
+      },
+      {
+        date: "02/05/2025",
+        image: "2.png",
+        story: "Ngày thứ hai bên nhau...\n\nChúng ta cùng ngắm hoàng hôn, bàn tay nắm chặt lấy nhau. Từng khoảnh khắc trôi qua đều trở thành kỷ niệm quý giá mà tôi muốn giữ mãi trong tim."
+      },
+      {
+        date: "03/05/2025",
+        image: "3.png",
+        story: "Ngày thứ ba - Một chương mới...\n\nHôm nay, dưới bầu trời đầy sao, tôi muốn nói với em rằng: 'Cảm ơn em đã đến bên tôi và làm cuộc sống này trở nên tuyệt vời hơn bao giờ hết.'"
+      },
+      {
+        date: "03/05/2025",
+        image: "4.png",
+        story: "Test\n\nTest"
+      }
+
+
+
+      // Để thêm kỷ niệm mới, chỉ cần thêm object vào mảng này
+      // Ví dụ:
+      // {
+      //   date: "04/05/2025",
+      //   image: "4.png",
+      //   story: "Nội dung câu chuyện mới..."
+      // }
+    ];
+
+    // Khởi tạo các biến
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const welcomeTitle = document.getElementById('welcomeTitle');
+    const mainContent = document.getElementById('mainContent');
+    const mainHeader = document.getElementById('mainHeader');
+    const mainContainer = document.getElementById('mainContainer');
+    const musicControl = document.getElementById('musicControl');
+    const bgMusic = document.getElementById('bgMusic');
+    const storyBox = document.getElementById('storyBox');
+    const storyText = document.getElementById('storyText');
+    const imageList = document.getElementById('imageList');
+
+    let activeId = null;
+    let isMusicPlaying = false;
+
+    // Hàm tạo HTML cho các kỷ niệm
+    function renderMemories() {
+      imageList.innerHTML = '';
+      
+      memories.forEach((memory, index) => {
+        const memoryId = index + 1; // ID bắt đầu từ 1
+        
+        const memoryElement = document.createElement('div');
+        memoryElement.className = 'image-item';
+        memoryElement.innerHTML = `
+          <div class="date-label">${memory.date}</div>
+          <img src="${memory.image}" alt="Ảnh ${memoryId}" data-id="${memoryId}">
+        `;
+        
+        imageList.appendChild(memoryElement);
+      });
+      
+      // Gắn sự kiện click cho các ảnh sau khi render
+      const images = document.querySelectorAll('.image-item img');
+      setupImageClickEvents(images);
+    }
+
+    // Hàm gắn sự kiện click cho ảnh
+    function setupImageClickEvents(images) {
+      images.forEach(img => {
+        img.addEventListener('click', () => {
+          const selectedId = img.dataset.id;
+          const selectedMemory = memories[selectedId - 1];
+
+          if (activeId === selectedId) {
+            // Bỏ chọn ảnh hiện tại
+            img.classList.remove('active');
+            storyBox.classList.remove('active');
+            imageList.classList.remove('narrow');
+            setTimeout(() => {
+              storyText.value = '';
+              activeId = null;
+            }, 300);
+          } else {
+            // Chọn ảnh mới
+            if (activeId !== null) {
+              const activeImg = document.querySelector(`img[data-id="${activeId}"]`);
+              if (activeImg) {
+                activeImg.classList.remove('active');
+              }
+            }
+
+            img.classList.add('active');
+            imageList.classList.add('narrow');
+            storyBox.classList.add('active');
+            storyText.value = selectedMemory.story || '';
+            activeId = selectedId;
+            
+            // Cuộn đến ảnh được chọn
+            img.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        });
+      });
+    }
+
+    // Sự kiện click màn hình chào
+    welcomeScreen.addEventListener('click', () => {
+      welcomeScreen.style.opacity = '0';
+      welcomeTitle.style.transform = 'translateY(-100px)';
+
+      bgMusic.play().then(() => {
+        isMusicPlaying = true;
+      }).catch(() => {
+        musicControl.innerHTML = '<i class="fas fa-music"></i>';
+      });
+
+      setTimeout(() => {
+        welcomeScreen.style.display = 'none';
+        mainContent.style.display = 'flex';
+        setTimeout(() => {
+          mainHeader.style.transform = 'translateY(0)';
+          mainHeader.style.opacity = '1';
+          mainContainer.style.transform = 'translateY(0)';
+          mainContainer.style.opacity = '1';
+          musicControl.classList.add('visible');
+        }, 100);
+      }, 1000);
+    });
+
+    // Sự kiện click nút nhạc
+    musicControl.addEventListener('click', () => {
+      if (isMusicPlaying) {
+        bgMusic.pause();
+        musicControl.innerHTML = '<i class="fas fa-music"></i>';
+      } else {
+        bgMusic.play();
+        musicControl.innerHTML = '<i class="fas fa-pause"></i>';
+      }
+      isMusicPlaying = !isMusicPlaying;
+    });
+
+    // Khởi tạo trang
+    document.addEventListener('DOMContentLoaded', () => {
+      renderMemories();
+    });
+  </script>
+</body>
+</html>
