@@ -187,27 +187,27 @@
       opacity: 0;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       transition: all 0.5s cubic-bezier(0.65, 0, 0.35, 1);
       background-color: rgba(17, 17, 17, 0.8);
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
       margin: auto 20px auto 0;
-      height: 80%;
+      max-height: 80vh;
       overflow: hidden;
+      position: relative;
     }
 
     .story-box.active {
       width: 40%;
       opacity: 1;
-      display: flex;
+      height: auto;
     }
 
     /* Khung truyện */
     textarea {
       width: 100%;
-      height: 100%;
+      min-height: 100px;
       background-color: rgba(34, 34, 34, 0.9);
       color: white;
       border: none;
@@ -217,7 +217,8 @@
       font-family: 'Quicksand', sans-serif;
       line-height: 1.6;
       border-radius: 5px;
-      transition: all 0.3s ease;
+      overflow-y: auto;
+      box-sizing: border-box;
     }
 
     textarea:focus {
@@ -299,9 +300,6 @@
   </audio>
 
   <script>
-
-
-
     // Dữ liệu ảnh và câu chuyện
     const memories = [
       {
@@ -312,28 +310,18 @@
       {
         date: "18/04/2025",
         image: "2.png",
-        story: "Bước ngoặc\n\nSau khoảng thời gian suy nghĩ siêu siêu lâu thì tối hôm trước tui từ chối hay sao ý, mà suy nghĩ hồi lại thâu =))))))))))))). Xong tui rủ bà đi ăn mì cay, tui tưởng v là quen được ròi, mà hình như bé mong chờ cái gì ý đúng hong"
+        story: "Bước ngoặt\n\nSau khoảng thời gian suy nghĩ siêu siêu lâu thì tối hôm trước tui từ chối hay sao ý, mà suy nghĩ hồi lại thâu =))))))))))))). Xong tui rủ bà đi ăn mì cay, tui tưởng v là quen được ròi, mà hình như bé mong chờ cái gì ý đúng hong"
       },
       {
         date: "30/04/2025",
         image: "3.png",
         story: "First date\n\nChắc là một trong những ngày đi chơi đáng nhớ nhất, em makeup xinh lung linh luôn. Tui đòi đi Q1 xong không có xe đợi chết luôn. Xong phải tống 3 =)))))))))) về. May mà chụp hình vẫn xênh nên em hong cọc. Xong gồi lúc xem phim tui phải làm gì cần làm nữa. Linh nhớ là kĩ kĩ nha Linh"
       },
-
-
-
       {
         date: "Đang cập nhật típ",
         image: "9000.png",
         story: "Và...\n\nCòn tiếp..."
       },
-      // Để thêm kỷ niệm mới, chỉ cần thêm object vào mảng này
-      // Ví dụ:
-      // {
-      //   date: "04/05/2025",
-      //   image: "4.png",
-      //   story: "Nội dung câu chuyện mới..."
-      // }
     ];
 
     // Khởi tạo các biến
@@ -351,12 +339,18 @@
     let activeId = null;
     let isMusicPlaying = false;
 
+    // Hàm tự động điều chỉnh chiều cao textarea
+    function autoResizeTextarea() {
+      storyText.style.height = 'auto';
+      storyText.style.height = storyText.scrollHeight + 'px';
+    }
+
     // Hàm tạo HTML cho các kỷ niệm
     function renderMemories() {
       imageList.innerHTML = '';
       
       memories.forEach((memory, index) => {
-        const memoryId = index + 1; // ID bắt đầu từ 1
+        const memoryId = index + 1;
         
         const memoryElement = document.createElement('div');
         memoryElement.className = 'image-item';
@@ -368,7 +362,7 @@
         imageList.appendChild(memoryElement);
       });
       
-      // Gắn sự kiện click cho các ảnh sau khi render
+      // Gắn sự kiện click cho các ảnh
       const images = document.querySelectorAll('.image-item img');
       setupImageClickEvents(images);
     }
@@ -403,6 +397,9 @@
             storyBox.classList.add('active');
             storyText.value = selectedMemory.story || '';
             activeId = selectedId;
+            
+            // Điều chỉnh chiều cao textarea
+            autoResizeTextarea();
             
             // Cuộn đến ảnh được chọn
             img.scrollIntoView({ behavior: 'smooth', block: 'center' });
